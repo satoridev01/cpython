@@ -1,2 +1,3 @@
 import:
   - satori://code/python/bandit.yml
+  - satori://code/github/gato-x.yml
