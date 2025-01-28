@@ -5,29 +5,27 @@ on:
   pull_request:
     branches: [ main ]
 
-description: "Assert the behavior of your software"
-branding:
-  icon: 'check-circle'
-  color: 'white'
-runs:
-  using: "composite"
-  steps:
-    - name: Satori CLI
-      shell: bash
-      env:
-        SATORITOKEN: ${{ secrets.SATORITOKEN }}
-        <<: ${{ toJSON(secrets) }}
-      run: |
-        pip3 install satori-ci >> /dev/null
-        satori config token "$SATORITOKEN"
-        
-        # Build parameters string
-        PARAMS=""
-        for secret in $(jq -r 'to_entries | .[] | "\(.key)=\(.value)"' <<< '${{ toJSON(secrets) }}'); do
-          key=${secret%%=*}
-          value=${secret#*=}
-          PARAMS="$PARAMS -d $key=$value"
-        done
-
-        echo satori local ./ --report $PARAMS
-        satori local ./ --report $PARAMS
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Satori CLI
+        shell: bash
+        env:
+          SATORITOKEN: ${{ secrets.SATORITOKEN }}
+          <<: ${{ toJSON(secrets) }}
+        run: |
+          pip3 install satori-ci >> /dev/null
+          satori config token "$SATORITOKEN"
+          
+          # Build parameters string
+          PARAMS=""
+          for secret in $(jq -r 'to_entries | .[] | "\(.key)=\(.value)"' <<< '${{ toJSON(secrets) }}'); do
+            key=${secret%%=*}
+            value=${secret#*=}
+            PARAMS="$PARAMS -d $key=$value"
+          done
+          echo satori local ./ --report $PARAMS
+          satori local ./ --report $PARAMS
