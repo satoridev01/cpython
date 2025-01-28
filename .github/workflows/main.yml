@@ -28,5 +28,6 @@ runs:
           value=${secret#*=}
           PARAMS="$PARAMS -d $key=$value"
         done
-        
+
+        echo satori local ./ --report $PARAMS
         satori local ./ --report $PARAMS
