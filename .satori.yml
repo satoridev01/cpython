@@ -1,3 +1,6 @@
+settings:
+  name: test satori ci github action
+  
 import:
   - satori://code/python/bandit.yml
   - satori://code/github/gato-x.yml
