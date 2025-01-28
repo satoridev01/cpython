@@ -1,11 +1,27 @@
-on: [push]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Satori CI - Automated Testing
-        uses: satorici/action@v1.0.0
-        env:
-          SATORITOKEN: ${{ secrets.SATORITOKEN }}
+name: "Satori CI - Automated Testing"
+description: "Assert the behavior of your software"
+branding:
+  icon: 'check-circle'
+  color: 'white'
+runs:
+  using: "composite"
+  steps:
+    - name: Satori CLI
+      shell: bash
+      env:
+        SATORITOKEN: ${{ secrets.SATORITOKEN }}
+        # This inherits all environment secrets from the calling workflow
+        <<: ${{ toJSON(secrets) }}
+      run: |
+        pip3 install satori-ci >> /dev/null
+        satori config token "$SATORITOKEN"
+        
+        # Build parameters string. Satori will discard the unused parameters and redact the ones used defined in settings.
+        PARAMS=""
+        for secret in $(jq -r 'to_entries | .[] | "\(.key)=\(.value)"' <<< '${{ toJSON(secrets) }}'); do
+          key=${secret%%=*}
+          value=${secret#*=}
+          PARAMS="$PARAMS -d $key=$value"
+        done
+        echo satori local ./ --report $PARAMS
+        satori local ./ --report $PARAMS
